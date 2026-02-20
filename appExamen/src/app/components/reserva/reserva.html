@@ -1,0 +1,156 @@
+<div class="container mt-5">
+  <div class="card shadow border-0 rounded-4 mb-5">
+    <div [class]="reserva.idReserva ? 'card-header bg-warning py-3' : 'card-header bg-primary text-white py-3'">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+          <i class="bi" [ngClass]="reserva.idReserva ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+          {{ reserva.idReserva ? ' Actualizar Reserva N° ' + reserva.idReserva : ' Nueva Reserva' }}
+        </h5>
+        <span *ngIf="reserva.idReserva" class="badge bg-dark">Modo Edición</span>
+      </div>
+    </div>
+    
+    <div class="card-body p-4 bg-white">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Huésped</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+            <select class="form-select border-start-0" [(ngModel)]="reserva.huesped.idHuesped">
+              <option [ngValue]="null" disabled>Seleccione...</option>
+              <option *ngFor="let h of huespedes" [value]="h.idHuesped">{{h.nombre}}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Habitación</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-door-closed"></i></span>
+            <select class="form-select border-start-0" [(ngModel)]="reserva.habitacion.idHabitacion">
+              <option [ngValue]="null" disabled>Seleccione...</option>
+              <option *ngFor="let hab of habitaciones" [value]="hab.idHabitacion">N° {{hab.numero}}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Entrada</label>
+          <input type="date" class="form-control" [(ngModel)]="reserva.fechaInicio">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Salida</label>
+          <input type="date" class="form-control" [(ngModel)]="reserva.fechaFin">
+        </div>
+
+        <div class="col-md-2">
+          <div class="d-flex gap-2">
+            <button class="btn btn-success flex-grow-1 fw-bold shadow-sm" (click)="guardar()">
+              {{ reserva.idReserva ? 'ACTUALIZAR' : 'CONFIRMAR' }}
+            </button>
+            <button class="btn btn-outline-secondary shadow-sm" *ngIf="reserva.idReserva" (click)="limpiar()" title="Cancelar">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow border-0 rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-dark py-3 d-flex justify-content-between align-items-center">
+      <h5 class="text-white mb-0 fw-bold">
+        <i class="bi bi-table me-2"></i>Control de Estancias Actuales
+      </h5>
+      <button class="btn btn-sm btn-outline-light rounded-pill px-3" (click)="cargarDatos()">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refrescar
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr class="text-secondary small text-uppercase text-center">
+            <th class="ps-4 text-start">Huésped</th>
+            <th>Habitación</th>
+            <th>Periodo</th>
+            <th>Noches</th>
+            <th class="text-end pe-4">Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reservasPaginadas">
+            <td class="ps-4">
+              <div class="fw-bold text-dark">{{r.huesped.nombre}}</div>
+              <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-card-text me-1"></i>{{r.huesped.dni}}</div>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3">
+                Hab. {{r.habitacion.numero}}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="small">
+                <span class="text-success"><i class="bi bi-calendar-check me-1"></i>{{r.fechaInicio}}</span><br>
+                <span class="text-danger"><i class="bi bi-calendar-x me-1"></i>{{r.fechaFin}}</span>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="fw-bold">{{r.noches}}</span>
+            </td>
+            <td class="text-end pe-4">
+              <span class="fw-bold text-primary fs-5">S/ {{r.total | number:'1.2-2'}}</span>
+            </td>
+            <td class="text-center">
+              <div class="btn-group shadow-sm">
+                <button class="btn btn-sm btn-white text-primary border" (click)="prepararEdicion(r)" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-white text-danger border" (click)="eliminar(r.idReserva)" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+                <button class="btn btn-sm btn-white text-success border" (click)="generarPDF(r)" title="Imprimir Voucher">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="reservas.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted fst-italic">
+              No hay estancias registradas actualmente.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer bg-white py-3">
+      <div class="row align-items-center">
+        <div class="col">
+          <small class="text-muted fw-bold">
+            Mostrando página {{paginaActual}} de {{totalPaginas}}
+          </small>
+        </div>
+        <div class="col-auto">
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="paginaActual === 1">
+                <button class="page-link shadow-none" (click)="paginaActual = paginaActual - 1">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              <li class="page-item active"><span class="page-link">{{paginaActual}}</span></li>
+              <li class="page-item" [class.disabled]="paginaActual >= totalPaginas">
+                <button class="page-link shadow-none" (click)="paginaActual = paginaActual + 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

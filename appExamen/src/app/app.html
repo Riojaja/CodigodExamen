@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" routerLink="/reservas">
+      <i class="bi bi-buildings text-primary me-2"></i>HOTEL MASTER
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/tipos" routerLinkActive="active fw-bold text-primary">Tipos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/habitaciones" routerLinkActive="active fw-bold text-primary">Habitaciones</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/huespedes" routerLinkActive="active fw-bold text-primary">Huéspedes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/reservas" routerLinkActive="active fw-bold text-primary">Reservas</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <router-outlet></router-outlet> 
+</div>
+
+<footer class="text-center py-4 mt-5 border-top text-muted">
+  <small>Examen Final - Gestión Hotelera 2026</small>
+</footer>

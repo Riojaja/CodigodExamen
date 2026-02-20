@@ -1,0 +1,92 @@
+<div class="container mt-4">
+  <div class="card shadow border-0 rounded-4 mb-4">
+    <div [class]="tipo.idTipo ? 'card-header bg-warning py-3' : 'card-header bg-primary text-white py-3'">
+      <h5 class="mb-0 fw-bold">
+        <i class="bi bi-tag-fill me-2"></i>
+        {{ tipo.idTipo ? 'Editar Categoría: ' + tipo.nombre : 'Nueva Categoría de Habitación' }}
+      </h5>
+    </div>
+    <div class="card-body bg-light p-4">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-secondary">NOMBRE DE CATEGORÍA</label>
+          <input type="text" class="form-control" [(ngModel)]="tipo.nombre" placeholder="Ej: Suite Presidencial">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-bold text-secondary">PRECIO POR NOCHE</label>
+          <div class="input-group">
+            <span class="input-group-text">S/</span>
+            <input type="number" class="form-control" [(ngModel)]="tipo.precioNoche">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-secondary">DESCRIPCIÓN</label>
+          <input type="text" class="form-control" [(ngModel)]="tipo.descripcion" placeholder="Ej: Cama King Size, Jacuzzi...">
+        </div>
+        <div class="col-md-2 d-flex align-items-end gap-2">
+          <button class="btn btn-dark fw-bold w-100" (click)="guardar()">
+            {{ tipo.idTipo ? 'ACTUALIZAR' : 'GUARDAR' }}
+          </button>
+          <button class="btn btn-outline-secondary" *ngIf="tipo.idTipo" (click)="limpiar()">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+      <h5 class="mb-0 fw-bold"><i class="bi bi-layers-half me-2"></i>Tarifario y Categorías</h5>
+      <button class="btn btn-sm btn-outline-light rounded-pill px-3" (click)="listar()">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refrescar
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr class="small text-uppercase text-secondary">
+            <th class="ps-4">Categoría</th>
+            <th>Descripción</th>
+            <th>Precio Noche</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of paginados">
+            <td class="ps-4 fw-bold text-primary">{{t.nombre}}</td>
+            <td><span class="text-muted small">{{t.descripcion || 'Sin descripción'}}</span></td>
+            <td><span class="fw-bold fs-5 text-dark">S/ {{t.precioNoche | number:'1.2-2'}}</span></td>
+            <td class="text-center">
+              <div class="btn-group shadow-sm">
+                <button class="btn btn-sm btn-white border text-primary" (click)="prepararEdicion(t)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-white border text-danger" (click)="eliminar(t.idTipo)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+      <small class="text-muted fw-bold">Página {{paginaActual}} de {{totalPaginas}}</small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="paginaActual === 1">
+            <button class="page-link shadow-none" (click)="paginaActual = paginaActual - 1">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li class="page-item active"><span class="page-link">{{paginaActual}}</span></li>
+          <li class="page-item" [class.disabled]="paginaActual === totalPaginas || totalPaginas === 0">
+            <button class="page-link shadow-none" (click)="paginaActual = paginaActual + 1">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
