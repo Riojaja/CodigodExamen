@@ -1,32 +1,59 @@
 <div class="container mt-4">
   <div class="card shadow border-0 rounded-4 mb-4">
-    <div [class]="huesped.idHuesped ? 'card-header bg-warning py-3' : 'card-header bg-dark text-white py-3'">
+    <div class="card-header bg-dark text-white py-3">
       <h5 class="mb-0 fw-bold">
         <i class="bi bi-person-badge-fill me-2"></i>
         {{ huesped.idHuesped ? 'Actualizar Datos: ' + huesped.nombre : 'Nuevo Registro de Huésped' }}
       </h5>
     </div>
+
     <div class="card-body bg-light p-4">
       <div class="row g-3">
         <div class="col-md-4">
           <label class="form-label small fw-bold text-secondary">NOMBRE Y APELLIDOS</label>
-          <input type="text" class="form-control" [(ngModel)]="huesped.nombre" placeholder="Nombre completo">
+          <input type="text" 
+                 class="form-control shadow-none" 
+                 [(ngModel)]="huesped.nombre" 
+                 name="nombre"
+                 (blur)="formatearNombre()" 
+                 placeholder="Ej: juan perez">
         </div>
+
         <div class="col-md-2">
           <label class="form-label small fw-bold text-secondary">DNI / DOCUMENTO</label>
-          <input type="text" class="form-control" [(ngModel)]="huesped.dni" placeholder="8 dígitos">
+          <input type="text" 
+                 class="form-control shadow-none" 
+                 [(ngModel)]="huesped.dni" 
+                 name="dni"
+                 maxlength="8"
+                 (keypress)="soloNumeros($event)"
+                 placeholder="8 dígitos">
         </div>
+
         <div class="col-md-2">
           <label class="form-label small fw-bold text-secondary">TELÉFONO</label>
-          <input type="text" class="form-control" [(ngModel)]="huesped.telefono" placeholder="999...">
+          <input type="text" 
+                 class="form-control shadow-none" 
+                 [(ngModel)]="huesped.telefono" 
+                 name="telefono"
+                 maxlength="9"
+                 (keypress)="soloNumeros($event)"
+                 placeholder="9 dígitos">
         </div>
+
         <div class="col-md-4">
-          <label class="form-label small fw-bold text-secondary">EMAIL</label>
+          <label class="form-label small fw-bold text-secondary">EMAIL (@gmail.com)</label>
           <div class="input-group">
-            <input type="email" class="form-control" [(ngModel)]="huesped.email" placeholder="correo@ejemplo.com">
+            <input type="email" 
+                   class="form-control shadow-none" 
+                   [(ngModel)]="huesped.email" 
+                   name="email"
+                   placeholder="correo@gmail.com">
+            
             <button class="btn btn-primary fw-bold" (click)="guardar()">
               {{ huesped.idHuesped ? 'ACTUALIZAR' : 'GUARDAR' }}
             </button>
+
             <button class="btn btn-outline-secondary" *ngIf="huesped.idHuesped" (click)="limpiar()">
               <i class="bi bi-x-lg"></i>
             </button>
@@ -43,8 +70,9 @@
         <i class="bi bi-arrow-clockwise me-1"></i> Actualizar Lista
       </button>
     </div>
+
     <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0 text-center">
+      <table class="table align-middle mb-0 text-center bg-white">
         <thead class="table-light">
           <tr class="small text-uppercase text-secondary">
             <th class="ps-4 text-start">Huésped</th>
@@ -54,33 +82,50 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let h of paginados">
+          <tr *ngFor="let h of paginados" class="bg-white border-bottom">
             <td class="ps-4 text-start">
               <div class="fw-bold text-dark">{{h.nombre}}</div>
               <div class="text-muted small">{{h.email}}</div>
             </td>
-            <td><span class="badge bg-secondary-subtle text-secondary border px-3">DNI: {{h.dni}}</span></td>
-            <td><i class="bi bi-telephone-outbound me-2 text-primary"></i>{{h.telefono}}</td>
+            <td>
+              <span class="badge bg-secondary-subtle text-secondary border px-3">
+                DNI: {{h.dni}}
+              </span>
+            </td>
+            <td>
+              <div class="small">
+                <i class="bi bi-telephone-outbound me-2 text-primary"></i>{{h.telefono}}
+              </div>
+            </td>
             <td>
               <div class="btn-group shadow-sm rounded">
-                <button class="btn btn-sm btn-white border text-primary" (click)="prepararEdicion(h)">
+                <button class="btn btn-sm btn-white border text-primary" 
+                        (click)="prepararEdicion(h)" 
+                        title="Editar">
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-sm btn-white border text-danger" (click)="eliminar(h.idHuesped)">
+                <button class="btn btn-sm btn-white border text-danger" 
+                        (click)="eliminar(h.idHuesped)" 
+                        title="Eliminar">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
             </td>
           </tr>
+
           <tr *ngIf="huespedes.length === 0">
-            <td colspan="4" class="text-center py-4 text-muted">No se encontraron huéspedes registrados.</td>
+            <td colspan="4" class="text-center py-4 text-muted bg-white">
+              <i class="bi bi-info-circle me-2"></i>No se encontraron huéspedes registrados.
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-      <small class="text-muted fw-bold">Página {{paginaActual}} de {{totalPaginas}}</small>
+      <small class="text-muted fw-bold">
+        Mostrando página {{paginaActual}} de {{totalPaginas}}
+      </small>
       <nav>
         <ul class="pagination pagination-sm mb-0">
           <li class="page-item" [class.disabled]="paginaActual === 1">
@@ -88,7 +133,11 @@
               <i class="bi bi-chevron-left"></i>
             </button>
           </li>
-          <li class="page-item active"><span class="page-link">{{paginaActual}}</span></li>
+          
+          <li class="page-item active">
+            <span class="page-link">{{paginaActual}}</span>
+          </li>
+
           <li class="page-item" [class.disabled]="paginaActual === totalPaginas || totalPaginas === 0">
             <button class="page-link" (click)="paginaActual = paginaActual + 1">
               <i class="bi bi-chevron-right"></i>
@@ -97,13 +146,5 @@
         </ul>
       </nav>
     </div>
-  </div>
-
-  <div class="card shadow-sm border-0 rounded-4 bg-white p-4 mb-5 border-start border-4 border-danger">
-    <div class="d-flex align-items-center mb-1">
-      <i class="bi bi-file-earmark-pdf-fill text-danger fs-4 me-2"></i>
-      <h6 class="mb-0 fw-bold text-uppercase" style="letter-spacing: 1px;">Información de Comprobante en PDF</h6>
-    </div>
-    <p class="text-muted fst-italic ms-5 mb-0">HOTEL DESARROLLO DE SW II</p>
   </div>
 </div>

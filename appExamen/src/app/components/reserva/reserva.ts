@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common'; // Importamos DecimalPipe para los precios
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReservaService } from '../../services/reserva';
 import { HuespedService } from '../../services/huesped';
@@ -20,13 +20,15 @@ export class ReservaComponent implements OnInit {
   reservas: any[] = [];
   huespedes: any[] = [];
   habitaciones: any[] = [];
-
+  
+  reservaSeleccionada: any = null;
   paginaActual: number = 1;
   itemsPorPagina: number = 6;
+  fechaMinima: string = '';
 
   reserva: any = {
     idReserva: null,
-    huesped: { idHuesped: null },
+    huesped: { idHuesped: null }, 
     habitacion: { idHabitacion: null },
     fechaInicio: '',
     fechaFin: ''
@@ -36,15 +38,16 @@ export class ReservaComponent implements OnInit {
     private reservaService: ReservaService,
     private huespedService: HuespedService,
     private habitacionService: HabitacionService
-  ) { }
+  ) {
+    this.fechaMinima = new Date().toISOString().split('T')[0];
+  }
 
-  ngOnInit(): void { this.cargarDatos(); }
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
 
   cargarDatos(): void {
-    this.reservaService.listar().subscribe({
-      next: (data: any) => this.reservas = data,
-      error: (err: any) => console.error('Error al cargar reservas', err)
-    });
+    this.reservaService.listar().subscribe((data: any) => this.reservas = data);
     this.huespedService.listar().subscribe((data: any) => this.huespedes = data);
     this.habitacionService.listar().subscribe((data: any) => this.habitaciones = data);
   }
@@ -58,9 +61,54 @@ export class ReservaComponent implements OnInit {
     return Math.ceil(this.reservas.length / this.itemsPorPagina) || 1;
   }
 
+  prepararBoleta(r: any): void {
+    this.reservaSeleccionada = r;
+  }
+
+  descargarPDF(): void {
+    if (this.reservaSeleccionada) {
+      this.generarPDF(this.reservaSeleccionada);
+    }
+  }
+
   guardar(): void {
+    // 1. Validar campos obligatorios
     if (!this.reserva.huesped.idHuesped || !this.reserva.habitacion.idHabitacion || !this.reserva.fechaInicio || !this.reserva.fechaFin) {
-      Swal.fire('Atención', 'Todos los campos son obligatorios', 'warning');
+      Swal.fire('Atención', 'Complete todos los campos obligatorios', 'warning');
+      return;
+    }
+
+    // 2. Validar que la fecha de salida sea después de la de entrada
+    if (this.reserva.fechaFin <= this.reserva.fechaInicio) {
+      Swal.fire('Error de Fechas', 'La fecha de salida debe ser posterior a la de entrada', 'error');
+      return;
+    }
+
+    // --- 3. LÓGICA DE TRASLAPE DE FECHAS (DISPONIBILIDAD REAL) ---
+    const hayCruce = this.reservas.some(r => {
+      // Si estamos editando, ignorar la propia reserva que estamos modificando
+      if (this.reserva.idReserva && r.idReserva === this.reserva.idReserva) return false;
+
+      // Verificar si es la misma habitación
+      if (r.habitacion.idHabitacion == this.reserva.habitacion.idHabitacion) {
+        const inicioNueva = new Date(this.reserva.fechaInicio).getTime();
+        const finNueva = new Date(this.reserva.fechaFin).getTime();
+        const inicioExistente = new Date(r.fechaInicio).getTime();
+        const finExistente = new Date(r.fechaFin).getTime();
+
+        // Fórmula: Hay cruce si (InicioA < FinB) Y (FinA > InicioB)
+        return inicioNueva < finExistente && finNueva > inicioExistente;
+      }
+      return false;
+    });
+
+    if (hayCruce) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Habitación Ocupada',
+        text: 'La habitación seleccionada ya tiene una reserva en ese rango de fechas.',
+        confirmButtonColor: '#0d6efd'
+      });
       return;
     }
 
@@ -72,11 +120,21 @@ export class ReservaComponent implements OnInit {
 
     this.reservaService.registrar(payload).subscribe({
       next: () => {
-        Swal.fire('Éxito', this.reserva.idReserva ? 'Reserva actualizada' : 'Reserva confirmada', 'success');
+        Swal.fire({
+          icon: 'success',
+          title: this.reserva.idReserva ? 'Actualización Exitosa' : '¡Reserva Confirmada!',
+          text: 'La estancia se registró correctamente en el sistema.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#0d6efd',
+          showConfirmButton: true
+        });
         this.cargarDatos();
         this.limpiar();
       },
-      error: () => Swal.fire('Error', 'No se pudo procesar la reserva', 'error')
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Error', 'No se pudo procesar la reserva en el servidor.', 'error');
+      }
     });
   }
 
@@ -93,58 +151,67 @@ export class ReservaComponent implements OnInit {
 
   eliminar(id: number): void {
     Swal.fire({
-      title: '¿Eliminar estancia?',
-      text: "Esta acción no se puede deshacer",
+      title: '¿Anular esta reserva?',
+      text: 'Esta acción liberará la habitación automáticamente.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar'
+      confirmButtonText: 'Sí, anular',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33'
     }).then((result) => {
       if (result.isConfirmed) {
         this.reservaService.eliminar(id).subscribe(() => {
           this.cargarDatos();
-          Swal.fire('Eliminado', 'La reserva ha sido borrada', 'success');
+          Swal.fire({
+            title: 'Anulada',
+            text: 'La reserva ha sido eliminada.',
+            icon: 'success',
+            confirmButtonColor: '#0d6efd'
+          });
         });
       }
     });
   }
 
   limpiar(): void {
-    this.reserva = { idReserva: null, huesped: { idHuesped: null }, habitacion: { idHabitacion: null }, fechaInicio: '', fechaFin: '' };
+    this.reserva = { 
+      idReserva: null, 
+      huesped: { idHuesped: null }, 
+      habitacion: { idHabitacion: null }, 
+      fechaInicio: '', 
+      fechaFin: '' 
+    };
   }
 
   generarPDF(r: any): void {
     const doc = new jsPDF();
-    
-    // Header
-    doc.setFillColor(33, 37, 41); // Dark color
-    doc.rect(0, 0, 210, 35, 'F');
+    doc.setFillColor(13, 110, 253); 
+    doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.text('VOUCHER DE RESERVA', 105, 18, { align: 'center' });
+    doc.setFontSize(22);
+    doc.text('HOTELSITO', 105, 18, { align: 'center' });
     doc.setFontSize(10);
-    doc.text('SISTEMA DE GESTIÓN HOTELERA - DESARROLLO DE SW II', 105, 28, { align: 'center' });
+    doc.text('VOUCHER ELECTRÓNICO DE RESERVACIÓN', 105, 28, { align: 'center' });
 
-    // Body
     doc.setTextColor(40, 40, 40);
-    doc.text(`Comprobante N°: RES-00${r.idReserva}`, 15, 50);
-    doc.text(`Fecha Emisión: ${new Date().toLocaleDateString()}`, 150, 50);
+    doc.setFontSize(12);
+    doc.text(`RESERVA N°: RES-00${r.idReserva}`, 15, 55);
+    doc.text(`Fecha Emisión: ${new Date().toLocaleDateString()}`, 140, 55);
 
     autoTable(doc, {
-      startY: 60,
-      head: [['Descripción', 'Detalle del Registro']],
+      startY: 65,
+      head: [['Concepto', 'Detalle']],
       body: [
-        ['Cliente', r.huesped.nombre],
-        ['DNI / Documento', r.huesped.dni],
+        ['Huésped', r.huesped.nombre],
+        ['DNI', r.huesped.dni],
         ['Habitación', `N° ${r.habitacion.numero}`],
         ['Check-In', r.fechaInicio],
         ['Check-Out', r.fechaFin],
-        ['Noches', r.noches.toString()],
-        ['Total Pagado', `S/ ${r.total.toFixed(2)}`]
+        ['Noches', r.noches],
+        ['Total Pagado', `S/ ${r.total?.toFixed(2) || '0.00'}`]
       ],
-      headStyles: { fillColor: [13, 110, 253] }
+      headStyles: { fillColor: [33, 37, 41] }
     });
-
-    doc.save(`Comprobante_Reserva_${r.idReserva}.pdf`);
+    doc.save(`Reserva_${r.huesped.nombre.replace(/\s+/g, '_')}.pdf`);
   }
 }
