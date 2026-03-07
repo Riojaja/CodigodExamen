@@ -1,0 +1,100 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h3 class="h5 mb-0">{{ isEdit ? 'Editar' : 'Nueva' }} Habitación</h3>
+        </div>
+        <div class="card-body">
+          <!-- Mensaje de éxito -->
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+          </div>
+
+          <!-- Mensaje de error -->
+          <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+            <button type="button" class="btn-close" (click)="error=''"></button>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" #habitacionForm="ngForm" class="needs-validation" novalidate>
+            <!-- Número -->
+            <div class="mb-3">
+              <label for="numero" class="form-label">Número de habitación</label>
+              <input
+                type="text"
+                class="form-control"
+                id="numero"
+                name="numero"
+                [(ngModel)]="habitacion.numero"
+                required
+                #numero="ngModel"
+                placeholder="Ej: 101"
+              />
+              <div *ngIf="numero.invalid && numero.touched" class="text-danger small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>El número es obligatorio.
+              </div>
+            </div>
+
+            <!-- Tipo de habitación -->
+            <div class="mb-3">
+              <label for="tipo" class="form-label">Tipo de habitación</label>
+              <select
+                class="form-select"
+                id="tipo"
+                name="tipo"
+                [(ngModel)]="habitacion.tipo"
+                required
+                #tipo="ngModel"
+              >
+                <option [ngValue]="null" disabled>Seleccione un tipo</option>
+                <option *ngFor="let t of tipos" [ngValue]="t">
+                  {{ t.nombre }} - S/ {{ t.precioNoche | number:'1.2-2' }}
+                </option>
+              </select>
+              <div *ngIf="tipo.invalid && tipo.touched" class="text-danger small mt-1">
+                <i class="bi bi-exclamation-circle me-1"></i>Debe seleccionar un tipo.
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="mb-4">
+              <label for="estado" class="form-label">Estado</label>
+              <select
+                class="form-select"
+                id="estado"
+                name="estado"
+                [(ngModel)]="habitacion.estado"
+                required
+              >
+                <option value="Disponible">Disponible</option>
+                <option value="Ocupada">Ocupada</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+              </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex gap-2">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="habitacionForm.invalid || loading"
+              >
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <i *ngIf="!loading" class="bi bi-check-lg me-1"></i>
+                {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Guardar') }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                routerLink="/habitaciones"
+              >
+                <i class="bi bi-x-lg me-1"></i>Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

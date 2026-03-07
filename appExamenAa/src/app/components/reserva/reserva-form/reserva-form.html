@@ -1,0 +1,104 @@
+<div class="container mt-4">
+  <h2>{{ editMode ? 'Editar' : 'Nueva' }} Reserva</h2>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form (ngSubmit)="onSubmit()" #reservaForm="ngForm" *ngIf="!loading">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="huesped" class="form-label">Huésped *</label>
+        <select
+          class="form-select"
+          id="huesped"
+          [(ngModel)]="reserva.huesped"
+          name="huesped"
+          required
+        >
+          <option [ngValue]="null" disabled selected>Seleccione un huésped</option>
+          <option *ngFor="let h of huespedes" [ngValue]="h">
+            {{ h.nombre }} ({{ h.dni }})
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="tipo" class="form-label">Tipo de Habitación</label>
+        <select
+          class="form-select"
+          id="tipo"
+          [(ngModel)]="idTipoSeleccionado"
+          name="tipo"
+          (change)="cargarHabitacionesPorTipo()"
+        >
+          <option [ngValue]="0">Seleccione tipo</option>
+          <option *ngFor="let t of tipos" [ngValue]="t.idTipo">
+            {{ t.nombre }} - S/ {{ t.precioNoche }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="habitacion" class="form-label">Habitación *</label>
+        <select
+          class="form-select"
+          id="habitacion"
+          [(ngModel)]="reserva.habitacion"
+          name="habitacion"
+          required
+        >
+          <option [ngValue]="null" disabled>Seleccione una habitación</option>
+          <option *ngFor="let h of habitacionesDisponibles" [ngValue]="h">
+            {{ h.numero }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label for="fechaInicio" class="form-label">Fecha Inicio *</label>
+        <input
+          type="date"
+          class="form-control"
+          id="fechaInicio"
+          [(ngModel)]="reserva.fechaInicio"
+          name="fechaInicio"
+          required
+        />
+      </div>
+
+      <div class="col-md-3 mb-3">
+        <label for="fechaFin" class="form-label">Fecha Fin *</label>
+        <input
+          type="date"
+          class="form-control"
+          id="fechaFin"
+          [(ngModel)]="reserva.fechaFin"
+          name="fechaFin"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <button
+          type="submit"
+          class="btn btn-primary me-2"
+          [disabled]="reservaForm.invalid"
+        >
+          Guardar
+        </button>
+        <button type="button" class="btn btn-secondary" routerLink="/reservas">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class="text-center mt-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+</div>

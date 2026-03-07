@@ -1,0 +1,68 @@
+<div class="card shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h3 class="h5 mb-0">Gestión de Tipos de Habitación</h3>
+    <a *ngIf="isAdmin" routerLink="/tipos-habitacion/nuevo" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle"></i> Nuevo Tipo
+    </a>
+  </div>
+  <div class="card-body">
+    <!-- Indicador de carga -->
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+      <button type="button" class="btn-close" (click)="successMessage=''"></button>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+      <button type="button" class="btn-close" (click)="error=''"></button>
+    </div>
+
+    <!-- Sin datos -->
+    <div *ngIf="!loading && tipos.length === 0" class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>No hay tipos de habitación registrados.
+    </div>
+
+    <!-- Tabla de tipos -->
+    <div class="table-responsive" *ngIf="!loading && tipos.length > 0">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Precio por noche</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of tipos">
+            <td>{{ t.idTipo }}</td>
+            <td>{{ t.nombre }}</td>
+            <td>{{ t.descripcion }}</td>
+            <td>{{ t.precioNoche | currency:'S/ ' }}</td>
+            <td>
+              <div class="btn-group btn-group-sm" role="group">
+                <!-- Botón Editar (solo ADMIN) -->
+                <a *ngIf="isAdmin" [routerLink]="['/tipos-habitacion/editar', t.idTipo]" class="btn btn-outline-warning" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <!-- Botón Eliminar (solo ADMIN) -->
+                <button *ngIf="isAdmin" (click)="eliminar(t.idTipo)" class="btn btn-outline-danger" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

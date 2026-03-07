@@ -1,0 +1,24 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; height: 100vh; position: fixed; left: 0; top: 0;">
+  <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+    <span class="fs-4">🏨 HOTELSITO</span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item"><a routerLink="/reservas" routerLinkActive="active" class="nav-link link-dark">📋 Reservas</a></li>
+    <li><a routerLink="/tipos-habitacion" routerLinkActive="active" class="nav-link link-dark">🏷️ Tipos de Habitación</a></li>
+    <li><a routerLink="/habitaciones" routerLinkActive="active" class="nav-link link-dark">🛏️ Habitaciones</a></li>
+    <li><a routerLink="/huespedes" routerLinkActive="active" class="nav-link link-dark">👥 Huéspedes</a></li>
+  </ul>
+  <hr>
+  <div class="dropdown" *ngIf="user; else login">
+    <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+      <strong>{{ user?.username || 'Usuario' }}</strong>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+      <li><a class="dropdown-item" href="#" (click)="$event.preventDefault(); logout()">Cerrar sesión</a></li>
+    </ul>
+  </div>
+  <ng-template #login>
+    <a routerLink="/login" class="btn btn-primary w-100">Iniciar sesión</a>
+  </ng-template>
+</div>

@@ -1,0 +1,10 @@
+<div class="d-flex">
+  <app-sidebar></app-sidebar>
+  <div class="d-flex flex-column" style="margin-left: 280px; width: 100%; min-height: 100vh;">
+    <div class="content flex-grow-1 p-4">
+      <router-outlet></router-outlet>
+      <button (click)="logout()" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">Cerrar sesión</button>
+    </div>
+    <app-footer></app-footer>
+  </div>
+</div>
