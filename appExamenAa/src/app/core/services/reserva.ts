@@ -41,4 +41,10 @@ export class ReservaService {
   generarPdf(id: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
   }
+
+  verificarDisponibilidad(idHabitacion: number, fechaInicio: string, fechaFin: string, idReserva?: number): Observable<boolean> {
+    let params = `?idHabitacion=${idHabitacion}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    if (idReserva) params += `&idReserva=${idReserva}`;
+    return this.http.get<boolean>(`${this.apiUrl}/disponibilidad${params}`);
+  }
 }

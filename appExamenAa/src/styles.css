@@ -164,3 +164,29 @@ body {
 .btn-icon {
   margin-right: 5px;
 }
+
+
+
+.centered-modal .modal-dialog {
+  margin: 1.75rem auto !important;
+  transform: none !important;
+}
+
+.modal.show {
+  display: block !important;
+  background-color: rgba(0,0,0,0.5) !important;
+}
+.modal-backdrop.show {
+  opacity: 0.5 !important;
+}
+
+.modal {
+  display: block !important;
+  background-color: rgba(0,0,0,0.5) !important;
+  z-index: 9999 !important;
+}
+.modal-dialog {
+  margin-top: 100px !important;
+  background-color: white;
+  border-radius: 8px;
+}

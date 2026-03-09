@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HuespedService } from '../../../core/services/huesped';
 import { Huesped } from '../../../models/huesped';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-huesped-form',
@@ -23,6 +24,7 @@ export class HuespedFormComponent implements OnInit {
   isEdit = false;
   loading = false;
   error = '';
+  successMessage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -39,35 +41,49 @@ export class HuespedFormComponent implements OnInit {
   }
 
   cargarHuesped(id: number): void {
+    this.loading = true;
     this.huespedService.obtener(id).subscribe({
-      next: (data) => this.huesped = data,
+      next: (data) => {
+        this.huesped = data;
+        this.loading = false;
+      },
       error: (err) => {
-        this.error = 'Error al cargar el huésped';
         console.error(err);
+        this.error = 'Error al cargar el huésped';
+        this.loading = false;
       }
     });
   }
 
   onSubmit(): void {
     this.loading = true;
-    if (this.isEdit) {
-      this.huespedService.actualizar(this.huesped.idHuesped, this.huesped).subscribe({
-        next: () => this.router.navigate(['/huespedes']),
-        error: (err) => {
-          this.error = 'Error al actualizar';
-          this.loading = false;
-          console.error(err);
-        }
-      });
-    } else {
-      this.huespedService.crear(this.huesped).subscribe({
-        next: () => this.router.navigate(['/huespedes']),
-        error: (err) => {
-          this.error = 'Error al crear';
-          this.loading = false;
-          console.error(err);
-        }
-      });
-    }
+    this.error = '';
+
+    const operacion = this.isEdit
+      ? this.huespedService.actualizar(this.huesped.idHuesped, this.huesped)
+      : this.huespedService.crear(this.huesped);
+
+    operacion.subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: this.isEdit ? '¡Actualizado!' : '¡Creado!',
+          text: this.isEdit ? 'El huésped se actualizó correctamente.' : 'El huésped se creó correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          this.router.navigate(['/huespedes']);
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo guardar el huésped. Intente nuevamente.'
+        });
+        this.loading = false;
+      }
+    });
   }
 }

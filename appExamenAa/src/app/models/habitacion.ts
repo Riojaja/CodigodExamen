@@ -5,4 +5,5 @@ export interface Habitacion {
   numero: string;
   tipo: TipoHabitacion;
   estado: string;
+  imagenUrl?: string; // ← NUEVO: URL de la imagen (opcional)
 }

@@ -1,104 +1,205 @@
-<div class="container mt-4">
-  <h2>{{ editMode ? 'Editar' : 'Nueva' }} Reserva</h2>
-
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-
-  <form (ngSubmit)="onSubmit()" #reservaForm="ngForm" *ngIf="!loading">
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="huesped" class="form-label">Huésped *</label>
-        <select
-          class="form-select"
-          id="huesped"
-          [(ngModel)]="reserva.huesped"
-          name="huesped"
-          required
-        >
-          <option [ngValue]="null" disabled selected>Seleccione un huésped</option>
-          <option *ngFor="let h of huespedes" [ngValue]="h">
-            {{ h.nombre }} ({{ h.dni }})
-          </option>
-        </select>
+<div class="container mt-5">
+  <!-- Tarjeta principal con sombra elegante -->
+  <div class="card border-0 rounded-4 shadow-lg overflow-hidden">
+    <!-- Cabecera con gradiente -->
+    <div class="card-header bg-gradient text-white py-4 position-relative" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-calendar-plus fs-2 me-3"></i>
+        <h3 class="mb-0 fw-bold">{{ editMode ? 'Editar Reserva' : 'Nueva Reserva' }}</h3>
       </div>
-
-      <div class="col-md-6 mb-3">
-        <label for="tipo" class="form-label">Tipo de Habitación</label>
-        <select
-          class="form-select"
-          id="tipo"
-          [(ngModel)]="idTipoSeleccionado"
-          name="tipo"
-          (change)="cargarHabitacionesPorTipo()"
-        >
-          <option [ngValue]="0">Seleccione tipo</option>
-          <option *ngFor="let t of tipos" [ngValue]="t.idTipo">
-            {{ t.nombre }} - S/ {{ t.precioNoche }}
-          </option>
-        </select>
+      <!-- Decoración opcional -->
+      <div class="position-absolute top-0 end-0 p-3 opacity-25">
+        <i class="bi bi-building fs-1"></i>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="habitacion" class="form-label">Habitación *</label>
-        <select
-          class="form-select"
-          id="habitacion"
-          [(ngModel)]="reserva.habitacion"
-          name="habitacion"
-          required
-        >
-          <option [ngValue]="null" disabled>Seleccione una habitación</option>
-          <option *ngFor="let h of habitacionesDisponibles" [ngValue]="h">
-            {{ h.numero }}
-          </option>
-        </select>
+    <div class="card-body p-4 p-xl-5">
+      <!-- Mensajes de error con diseño mejorado -->
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show d-flex align-items-center border-start border-danger border-4 rounded-3 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+        <div class="flex-grow-1">{{ error }}</div>
+        <button type="button" class="btn-close" (click)="error=''"></button>
       </div>
 
-      <div class="col-md-3 mb-3">
-        <label for="fechaInicio" class="form-label">Fecha Inicio *</label>
-        <input
-          type="date"
-          class="form-control"
-          id="fechaInicio"
-          [(ngModel)]="reserva.fechaInicio"
-          name="fechaInicio"
-          required
-        />
-      </div>
+      <!-- Formulario -->
+      <form (ngSubmit)="onSubmit()" #reservaForm="ngForm" *ngIf="!loading" class="needs-validation" novalidate>
+        <div class="row g-4">
+          <!-- Huésped -->
+          <div class="col-lg-6">
+            <label for="huesped" class="form-label fw-semibold text-secondary">
+              <i class="bi bi-person-badge me-1 text-primary"></i> Huésped <span class="text-danger">*</span>
+            </label>
+            <select
+              class="form-select form-select-lg rounded-3 border-0 shadow-sm bg-light"
+              id="huesped"
+              [(ngModel)]="reserva.huesped"
+              name="huesped"
+              required
+              #huespedCtrl="ngModel"
+              [class.is-invalid]="huespedCtrl.invalid && huespedCtrl.touched"
+            >
+              <option [ngValue]="null" disabled selected>-- Seleccione un huésped --</option>
+              <option *ngFor="let h of huespedes" [ngValue]="h">
+                {{ h.nombre }} ({{ h.dni }})
+              </option>
+            </select>
+            <div *ngIf="huespedCtrl.invalid && huespedCtrl.touched" class="text-danger small mt-2 d-flex align-items-center">
+              <i class="bi bi-exclamation-circle me-1"></i> Huésped obligatorio
+            </div>
+          </div>
 
-      <div class="col-md-3 mb-3">
-        <label for="fechaFin" class="form-label">Fecha Fin *</label>
-        <input
-          type="date"
-          class="form-control"
-          id="fechaFin"
-          [(ngModel)]="reserva.fechaFin"
-          name="fechaFin"
-          required
-        />
-      </div>
-    </div>
+          <!-- Tipo de habitación -->
+          <div class="col-lg-6">
+            <label for="tipo" class="form-label fw-semibold text-secondary">
+              <i class="bi bi-door-open me-1 text-primary"></i> Tipo de Habitación
+            </label>
+            <select
+              class="form-select form-select-lg rounded-3 border-0 shadow-sm bg-light"
+              id="tipo"
+              [(ngModel)]="idTipoSeleccionado"
+              name="tipo"
+              (change)="onTipoChange()"
+            >
+              <option [ngValue]="0">-- Filtre por tipo --</option>
+              <option *ngFor="let t of tipos" [ngValue]="t.idTipo">
+                {{ t.nombre }} - S/ {{ t.precioNoche | number:'1.2-2' }}
+              </option>
+            </select>
+          </div>
 
-    <div class="row">
-      <div class="col-12">
-        <button
-          type="submit"
-          class="btn btn-primary me-2"
-          [disabled]="reservaForm.invalid"
-        >
-          Guardar
-        </button>
-        <button type="button" class="btn btn-secondary" routerLink="/reservas">
-          Cancelar
-        </button>
-      </div>
-    </div>
-  </form>
+          <!-- Habitación -->
+          <div class="col-lg-6">
+            <label for="habitacion" class="form-label fw-semibold text-secondary">
+              <i class="bi bi-house-door me-1 text-primary"></i> Habitación <span class="text-danger">*</span>
+            </label>
+            <select
+              class="form-select form-select-lg rounded-3 border-0 shadow-sm bg-light"
+              id="habitacion"
+              [(ngModel)]="reserva.habitacion"
+              name="habitacion"
+              required
+              #habitacionCtrl="ngModel"
+              (change)="onFechaHabitacionChange()"
+              [class.is-invalid]="habitacionCtrl.invalid && habitacionCtrl.touched"
+            >
+              <option [ngValue]="null" disabled selected>-- Seleccione una habitación --</option>
+              <option *ngFor="let h of habitacionesDisponibles" [ngValue]="h">
+                {{ h.numero }} ({{ h.estado }})
+              </option>
+            </select>
+            <div *ngIf="habitacionCtrl.invalid && habitacionCtrl.touched" class="text-danger small mt-2 d-flex align-items-center">
+              <i class="bi bi-exclamation-circle me-1"></i> Habitación obligatoria
+            </div>
+          </div>
 
-  <div *ngIf="loading" class="text-center mt-3">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+          <!-- Fechas -->
+          <div class="col-lg-3">
+            <label for="fechaInicio" class="form-label fw-semibold text-secondary">
+              <i class="bi bi-calendar2-check me-1 text-primary"></i> Fecha Inicio <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control form-control-lg rounded-3 border-0 shadow-sm bg-light"
+              id="fechaInicio"
+              [(ngModel)]="reserva.fechaInicio"
+              name="fechaInicio"
+              required
+              #fechaInicioCtrl="ngModel"
+              [min]="fechaMinima"
+              (change)="onFechaHabitacionChange()"
+              [class.is-invalid]="fechaInicioCtrl.invalid && fechaInicioCtrl.touched"
+            />
+            <div *ngIf="fechaInicioCtrl.invalid && fechaInicioCtrl.touched" class="text-danger small mt-2 d-flex align-items-center">
+              <i class="bi bi-exclamation-circle me-1"></i> Fecha obligatoria
+            </div>
+          </div>
+
+          <div class="col-lg-3">
+            <label for="fechaFin" class="form-label fw-semibold text-secondary">
+              <i class="bi bi-calendar2-x me-1 text-primary"></i> Fecha Fin <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control form-control-lg rounded-3 border-0 shadow-sm bg-light"
+              id="fechaFin"
+              [(ngModel)]="reserva.fechaFin"
+              name="fechaFin"
+              required
+              #fechaFinCtrl="ngModel"
+              [min]="reserva.fechaInicio"
+              (change)="onFechaHabitacionChange()"
+              [class.is-invalid]="fechaFinCtrl.invalid && fechaFinCtrl.touched"
+            />
+            <div *ngIf="fechaFinCtrl.invalid && fechaFinCtrl.touched" class="text-danger small mt-2 d-flex align-items-center">
+              <i class="bi bi-exclamation-circle me-1"></i> Fecha obligatoria
+            </div>
+          </div>
+
+          <!-- Indicador de disponibilidad -->
+          <div class="col-12" *ngIf="reserva.habitacion?.idHabitacion && reserva.fechaInicio && reserva.fechaFin">
+            <div *ngIf="checkingDisponibilidad" class="alert alert-info d-flex align-items-center border-0 rounded-4 shadow-sm bg-soft-info">
+              <span class="spinner-border spinner-border-sm me-2 text-primary" role="status" aria-hidden="true"></span>
+              <span class="fw-medium">Verificando disponibilidad...</span>
+            </div>
+            <div *ngIf="!checkingDisponibilidad && disponibilidadChecked">
+              <div *ngIf="habitacionDisponible" class="alert alert-success d-flex align-items-center border-0 rounded-4 shadow-sm bg-soft-success">
+                <i class="bi bi-check-circle-fill me-3 fs-4 text-success"></i>
+                <span class="fw-medium">Habitación disponible en las fechas seleccionadas.</span>
+              </div>
+              <div *ngIf="!habitacionDisponible" class="alert alert-danger d-flex align-items-center border-0 rounded-4 shadow-sm bg-soft-danger">
+                <i class="bi bi-x-circle-fill me-3 fs-4 text-danger"></i>
+                <span class="fw-medium">La habitación no está disponible. Elija otras fechas u otra habitación.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen de cálculo con diseño destacado -->
+          <div class="col-12">
+            <div class="bg-gradient-soft p-4 rounded-4 shadow-sm d-flex align-items-center" style="background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);">
+              <i class="bi bi-calculator fs-1 text-primary me-4"></i>
+              <div class="flex-grow-1">
+                <h5 class="fw-bold mb-2">Resumen de la reserva</h5>
+                <p class="mb-0 fs-5" *ngIf="reserva.fechaInicio && reserva.fechaFin && reserva.habitacion?.tipo?.precioNoche">
+                  {{ reserva.noches || 0 }} noche(s) x S/ {{ reserva.precioNoche || 0 | number:'1.2-2' }} = 
+                  <strong class="text-primary fs-4">S/ {{ reserva.total || 0 | number:'1.2-2' }}</strong>
+                </p>
+                <p class="mb-0 text-muted" *ngIf="!reserva.fechaInicio || !reserva.fechaFin || !reserva.habitacion?.tipo?.precioNoche">
+                  Complete los datos para ver el total estimado.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="col-12 d-flex gap-3 justify-content-end mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary px-5 py-3 rounded-3 shadow-sm hover-lift"
+              [disabled]="reservaForm.invalid || loading || checkingDisponibilidad || (disponibilidadChecked && !habitacionDisponible)"
+            >
+              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <i *ngIf="!loading" class="bi bi-save me-2"></i>
+              <span class="fw-semibold">{{ editMode ? 'Actualizar' : 'Guardar' }}</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary px-5 py-3 rounded-3 shadow-sm hover-lift"
+              routerLink="/reservas"
+            >
+              <i class="bi bi-x-lg me-2"></i>
+              <span class="fw-semibold">Cancelar</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Loading spinner con estilo mejorado -->
+      <div *ngIf="loading" class="text-center my-5 py-5">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 fs-5 text-muted fw-medium">Procesando...</p>
+      </div>
     </div>
   </div>
 </div>

@@ -1,0 +1,45 @@
+ .form-select-lg, .form-control-lg {
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  .form-select-lg:focus, .form-control-lg:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.25) !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Efecto hover en botones */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Fondo suave para alertas */
+  .bg-soft-info {
+    background-color: #e6f3ff;
+    color: #0a58ca;
+  }
+  .bg-soft-success {
+    background-color: #e1f7e3;
+    color: #146c43;
+  }
+  .bg-soft-danger {
+    background-color: #f8e1e3;
+    color: #b02a37;
+  }
+
+  /* Ajuste de iconos en alerts */
+  .alert i {
+    line-height: 1;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .card-header h3 {
+      font-size: 1.5rem;
+    }
+    .btn {
+      width: 100%;
+    }
+  }

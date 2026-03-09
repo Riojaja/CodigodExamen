@@ -1,0 +1,172 @@
+<div class="container py-4">
+  <!-- Título y estadísticas rápidas -->
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h1 class="display-5 fw-bold text-primary">
+        <i class="bi bi-building"></i> Encuentra tu habitación ideal
+      </h1>
+      <p class="lead text-muted">Descubre nuestras habitaciones disponibles y reserva tu estancia.</p>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-light border-0 rounded-4 p-3">
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold"><i class="bi bi-door-open me-2"></i>Disponibles:</span>
+          <span class="badge bg-success rounded-pill">{{ habitacionesFiltradas.length }}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <span class="fw-semibold"><i class="bi bi-currency-dollar me-2"></i>Precio prom.:</span>
+          <span class="badge bg-info rounded-pill">{{ precioPromedio | currency:'S/ ' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Búsqueda por texto -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold"><i class="bi bi-search me-1"></i>Buscar</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+            <input
+              type="text"
+              class="form-control border-start-0"
+              placeholder="Número, tipo, descripción..."
+              [(ngModel)]="busqueda"
+              (ngModelChange)="onFiltroChange()"
+            />
+          </div>
+        </div>
+
+        <!-- Tipo de habitación -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold"><i class="bi bi-tags me-1"></i>Tipo</label>
+          <select
+            class="form-select"
+            [(ngModel)]="tipoSeleccionado"
+            (ngModelChange)="onFiltroChange()"
+          >
+            <option [ngValue]="null">Todos los tipos</option>
+            <option *ngFor="let t of tipos" [ngValue]="t.idTipo">{{ t.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Precio mínimo -->
+        <div class="col-md-2">
+          <label class="form-label fw-semibold"><i class="bi bi-currency-dollar me-1"></i>Min.</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="S/ 0"
+            [(ngModel)]="precioMin"
+            (ngModelChange)="onFiltroChange()"
+            min="0"
+          />
+        </div>
+
+        <!-- Precio máximo -->
+        <div class="col-md-2">
+          <label class="form-label fw-semibold"><i class="bi bi-currency-dollar me-1"></i>Máx.</label>
+          <input
+            type="number"
+            class="form-control"
+            placeholder="S/ 1000"
+            [(ngModel)]="precioMax"
+            (ngModelChange)="onFiltroChange()"
+            min="0"
+          />
+        </div>
+
+        <!-- Botón limpiar -->
+        <div class="col-md-1 d-flex align-items-end">
+          <button class="btn btn-outline-secondary w-100" (click)="limpiarFiltros()" title="Limpiar filtros">
+            <i class="bi bi-eraser"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error=''"></button>
+  </div>
+
+  <!-- Grid de habitaciones -->
+  <div *ngIf="!loading && habitacionesFiltradas.length === 0" class="text-center py-5">
+    <i class="bi bi-emoji-frown display-1 text-muted"></i>
+    <p class="lead mt-3">No hay habitaciones que coincidan con los filtros.</p>
+  </div>
+
+  <div *ngIf="!loading && habitacionesFiltradas.length > 0" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col" *ngFor="let h of habitacionesPaginadas">
+      <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-effect">
+        <!-- Imagen -->
+        <div class="position-relative">
+          <img
+            [src]="h.imagenUrl || 'assets/placeholder-hotel.jpg'"
+            class="card-img-top"
+            alt="Habitación"
+            style="height: 200px; object-fit: cover;"
+            (error)="h.imagenUrl = 'assets/placeholder-hotel.jpg'"
+          />
+          <span
+            class="position-absolute top-0 end-0 m-2 badge rounded-pill"
+            [ngClass]="{'bg-success': h.estado === 'Disponible', 'bg-warning': h.estado !== 'Disponible'}"
+          >
+            {{ h.estado }}
+          </span>
+        </div>
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title fw-bold">Habitación {{ h.numero }}</h5>
+          <p class="card-text text-muted mb-1">
+            <i class="bi bi-door-open me-1"></i>{{ h.tipo?.nombre }}
+          </p>
+          <p class="card-text fw-bold text-primary fs-5">
+            {{ h.tipo?.precioNoche | currency:'S/ ' }} <span class="fw-normal text-muted small">/noche</span>
+          </p>
+          <p class="card-text small text-truncate-2">
+            {{ h.tipo?.descripcion }}
+          </p>
+          <div class="mt-auto">
+            <a [routerLink]="['/reservas/nuevo']" [queryParams]="{ habitacionId: h.idHabitacion }" class="btn btn-primary w-100 rounded-pill">
+              <i class="bi bi-calendar-check me-2"></i>Reservar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div *ngIf="!loading && totalPaginas > 1" class="d-flex justify-content-center mt-4">
+    <nav aria-label="Paginación">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="paginaActual === 1">
+          <a class="page-link" href="#" (click)="$event.preventDefault(); cambiarPagina(paginaActual - 1)" aria-label="Anterior">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li class="page-item" *ngFor="let p of [].constructor(totalPaginas); let i = index" [class.active]="paginaActual === i + 1">
+          <a class="page-link" href="#" (click)="$event.preventDefault(); cambiarPagina(i + 1)">{{ i + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+          <a class="page-link" href="#" (click)="$event.preventDefault(); cambiarPagina(paginaActual + 1)" aria-label="Siguiente">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>

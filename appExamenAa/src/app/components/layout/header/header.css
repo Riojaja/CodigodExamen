@@ -1,0 +1,17 @@
+header {
+  z-index: 1030;
+}
+.dropdown-toggle::after {
+  margin-left: 0.5rem;
+  color: #6c757d;
+}
+.dropdown-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+.btn-outline-primary {
+  border-width: 2px;
+}

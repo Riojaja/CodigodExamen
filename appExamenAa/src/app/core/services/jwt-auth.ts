@@ -31,14 +31,19 @@ export class JwtAuthService {
   constructor(
     private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
-        if (isPlatformBrowser(this.platformId)) {
+        console.log('Respuesta del login:', response);
+        console.log('Token a guardar:', response.token);
+        if (response && response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify({ id: response.id, username: response.username, role: response.role }));
+          console.log('Token guardado. Longitud:', response.token.length);
+        } else {
+          console.error('No hay token en la respuesta');
         }
       })
     );
@@ -67,8 +72,8 @@ export class JwtAuthService {
   }
 
   isAuthenticated(): boolean {
-  return !!this.getToken(); // getToken() retorna string | null, !! lo convierte a boolean
-}
+    return !!this.getToken(); // getToken() retorna string | null, !! lo convierte a boolean
+  }
 
   hasRole(role: string): boolean {
     const user = this.getUser();

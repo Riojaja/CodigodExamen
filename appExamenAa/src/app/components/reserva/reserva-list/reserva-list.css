@@ -1,0 +1,82 @@
+/* Filtros */
+.input-group-text {
+  background-color: transparent;
+  border-right: none;
+}
+.input-group .form-control {
+  border-left: none;
+}
+.input-group .form-control:focus {
+  box-shadow: none;
+  border-color: #dee2e6;
+}
+
+/* Tabla */
+.table thead th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+}
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s;
+}
+.btn-group .btn {
+  border-radius: 6px !important;
+  margin: 0 2px;
+}
+.btn-group .btn:hover {
+  transform: translateY(-1px);
+  transition: transform 0.1s;
+}
+
+/* Paginación */
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+}
+.pagination .page-link {
+  color: #0d6efd;
+  border-radius: 8px;
+  margin: 0 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+.card {
+  transition: all 0.2s;
+}
+.card-header {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.table th {
+  font-weight: 600;
+  color: #495057;
+}
+.table td {
+  vertical-align: middle;
+}
+.badge {
+  font-weight: 500;
+}
+.pagination .page-link {
+  border: none;
+  color: #495057;
+  margin: 0 2px;
+  border-radius: 4px;
+}
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: white;
+}
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+}

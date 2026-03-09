@@ -1,98 +1,172 @@
 <div class="container py-4">
   <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h3 class="h5 mb-0">{{ isEdit ? 'Editar' : 'Nueva' }} Habitación</h3>
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-lg">
+        <div class="card-header bg-gradient-primary text-white py-3">
+          <h4 class="mb-0 fw-light">
+            <i class="bi bi-building me-2"></i>
+            {{ isEdit ? 'Editar' : 'Nueva' }} Habitación
+          </h4>
         </div>
-        <div class="card-body">
-          <!-- Mensaje de éxito -->
-          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
+        <div class="card-body p-4">
+          <!-- Mensajes de éxito/error con iconos -->
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show border-0 border-start border-4 border-success" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+            <button type="button" class="btn-close" (click)="successMessage=''"></button>
           </div>
-
-          <!-- Mensaje de error -->
-          <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+          <div *ngIf="error" class="alert alert-danger alert-dismissible fade show border-0 border-start border-4 border-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
             <button type="button" class="btn-close" (click)="error=''"></button>
           </div>
 
-          <form (ngSubmit)="onSubmit()" #habitacionForm="ngForm" class="needs-validation" novalidate>
-            <!-- Número -->
-            <div class="mb-3">
-              <label for="numero" class="form-label">Número de habitación</label>
-              <input
-                type="text"
-                class="form-control"
-                id="numero"
-                name="numero"
-                [(ngModel)]="habitacion.numero"
-                required
-                #numero="ngModel"
-                placeholder="Ej: 101"
-              />
-              <div *ngIf="numero.invalid && numero.touched" class="text-danger small mt-1">
-                <i class="bi bi-exclamation-circle me-1"></i>El número es obligatorio.
+          <form (ngSubmit)="onSubmit()" #habitacionForm="ngForm" novalidate>
+            <!-- Número y Estado en la misma fila (en pantallas medianas) -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="numero" class="form-label fw-semibold">
+                  <i class="bi bi-hash me-1"></i> Número <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control form-control-lg"
+                  id="numero"
+                  name="numero"
+                  [(ngModel)]="habitacion.numero"
+                  required
+                  #numero="ngModel"
+                  placeholder="Ej: 101"
+                  [class.is-invalid]="numero.invalid && numero.touched"
+                />
+                <div *ngIf="numero.invalid && numero.touched" class="invalid-feedback">
+                  <i class="bi bi-exclamation-circle me-1"></i>El número es obligatorio.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="estado" class="form-label fw-semibold">
+                  <i class="bi bi-info-circle me-1"></i> Estado <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  id="estado"
+                  name="estado"
+                  [(ngModel)]="habitacion.estado"
+                  required
+                >
+                  <option value="Disponible">Disponible</option>
+                  <option value="Ocupada">Ocupada</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                </select>
               </div>
             </div>
 
             <!-- Tipo de habitación -->
             <div class="mb-3">
-              <label for="tipo" class="form-label">Tipo de habitación</label>
+              <label for="tipo" class="form-label fw-semibold">
+                <i class="bi bi-tags me-1"></i> Tipo de habitación <span class="text-danger">*</span>
+              </label>
               <select
-                class="form-select"
+                class="form-select form-select-lg"
                 id="tipo"
                 name="tipo"
                 [(ngModel)]="habitacion.tipo"
                 required
                 #tipo="ngModel"
+                [class.is-invalid]="tipo.invalid && tipo.touched"
               >
                 <option [ngValue]="null" disabled>Seleccione un tipo</option>
                 <option *ngFor="let t of tipos" [ngValue]="t">
                   {{ t.nombre }} - S/ {{ t.precioNoche | number:'1.2-2' }}
                 </option>
               </select>
-              <div *ngIf="tipo.invalid && tipo.touched" class="text-danger small mt-1">
+              <div *ngIf="tipo.invalid && tipo.touched" class="invalid-feedback">
                 <i class="bi bi-exclamation-circle me-1"></i>Debe seleccionar un tipo.
               </div>
             </div>
 
-            <!-- Estado -->
+            <!-- Opciones de imagen con diseño más atractivo -->
             <div class="mb-4">
-              <label for="estado" class="form-label">Estado</label>
-              <select
-                class="form-select"
-                id="estado"
-                name="estado"
-                [(ngModel)]="habitacion.estado"
-                required
-              >
-                <option value="Disponible">Disponible</option>
-                <option value="Ocupada">Ocupada</option>
-                <option value="Mantenimiento">Mantenimiento</option>
-              </select>
+              <label class="form-label fw-semibold">
+                <i class="bi bi-image me-1"></i> Imagen de la habitación
+              </label>
+              <div class="btn-group w-100 mb-2" role="group">
+                <input type="radio" class="btn-check" name="imagenOption" id="optionUrl" [value]="'url'" [(ngModel)]="imagenOption" autocomplete="off">
+                <label class="btn btn-outline-primary py-3" for="optionUrl">
+                  <i class="bi bi-link-45deg me-2"></i>URL
+                </label>
+
+                <input type="radio" class="btn-check" name="imagenOption" id="optionFile" [value]="'file'" [(ngModel)]="imagenOption" autocomplete="off">
+                <label class="btn btn-outline-primary py-3" for="optionFile">
+                  <i class="bi bi-cloud-arrow-up me-2"></i>Subir archivo
+                </label>
+              </div>
+
+              <!-- Campo URL -->
+              <div *ngIf="imagenOption === 'url'" class="mt-2">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-globe2"></i></span>
+                  <input
+                    type="url"
+                    class="form-control form-control-lg border-start-0"
+                    id="imagenUrl"
+                    name="imagenUrl"
+                    [(ngModel)]="habitacion.imagenUrl"
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+                </div>
+                <small class="text-muted">Ingrese la URL pública de la imagen</small>
+              </div>
+
+              <!-- Subir archivo -->
+              <div *ngIf="imagenOption === 'file'" class="mt-2">
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-file-earmark-image"></i></span>
+                  <input
+                    type="file"
+                    class="form-control form-control-lg"
+                    id="imagenFile"
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                  />
+                </div>
+                <div *ngIf="uploading" class="text-center mt-2">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Subiendo imagen...
+                </div>
+                <small class="text-muted">Formatos permitidos: JPG, PNG, GIF</small>
+              </div>
+
+              <!-- Previsualización con efecto de marco -->
+              <div *ngIf="previewUrl" class="mt-4 text-center">
+                <div class="preview-container border rounded-3 p-2 bg-light">
+                  <img [src]="previewUrl" alt="Vista previa" class="img-fluid rounded-3 shadow-sm" style="max-height: 250px;">
+                </div>
+              </div>
             </div>
 
-            <!-- Botones -->
-            <div class="d-flex gap-2">
+            <!-- Botones de acción -->
+            <div class="d-flex gap-2 mt-4">
               <button
                 type="submit"
-                class="btn btn-primary"
-                [disabled]="habitacionForm.invalid || loading"
+                class="btn btn-primary btn-lg flex-fill"
+                [disabled]="loading || uploading || habitacionForm.invalid"
               >
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <i *ngIf="!loading" class="bi bi-check-lg me-1"></i>
+                <i *ngIf="!loading" class="bi bi-check-lg me-2"></i>
                 {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Guardar') }}
               </button>
               <button
                 type="button"
-                class="btn btn-outline-secondary"
+                class="btn btn-outline-secondary btn-lg"
                 routerLink="/habitaciones"
               >
-                <i class="bi bi-x-lg me-1"></i>Cancelar
+                <i class="bi bi-x-lg me-2"></i>Cancelar
               </button>
             </div>
           </form>
+        </div>
+        <div class="card-footer bg-light text-muted text-center py-3">
+          <small><i class="bi bi-info-circle me-1"></i> Los campos marcados con <span class="text-danger">*</span> son obligatorios.</small>
         </div>
       </div>
     </div>
