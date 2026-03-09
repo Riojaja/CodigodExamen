@@ -1,0 +1,7 @@
+authMethod: 'keycloak'
+en Program arguments: --spring.profiles.active=keycloak
+
+
+authMethod: 'jwt'
+en VM arguments: -Dspring.profiles.active=jwt   
+ 
