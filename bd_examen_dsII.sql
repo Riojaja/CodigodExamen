@@ -60,3 +60,6 @@ CREATE TABLE usuario (
     password VARCHAR(100) NOT NULL,
     role VARCHAR(20) NOT NULL
 )
+
+select * from usuario
+ALTER TABLE habitacion ADD COLUMN imagen_url VARCHAR(255);
