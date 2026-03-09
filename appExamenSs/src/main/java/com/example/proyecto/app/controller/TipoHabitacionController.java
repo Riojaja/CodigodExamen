@@ -3,6 +3,7 @@ package com.example.proyecto.app.controller;
 import com.example.proyecto.app.model.TipoHabitacion;
 import com.example.proyecto.app.service.TipoHabitacionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +38,14 @@ public class TipoHabitacionController {
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        if (!service.existePorId(id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        service.eliminar(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (!service.existePorId(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            service.eliminar(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
     }
 }

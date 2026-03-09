@@ -35,6 +35,7 @@ public class KeycloakConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers("/api/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/upload").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -49,22 +50,36 @@ public class KeycloakConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             log.info("=== Procesando token JWT ===");
+            log.info("=== Procesando token JWT de Keycloak ===");
             log.info("Claims: {}", jwt.getClaims());
 
             List<GrantedAuthority> authorities = new ArrayList<>();
 
-            // Extraer roles de realm_access (Keycloak)
+            // 1. Buscar en realm_access.roles
             Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
             if (realmAccess != null && realmAccess.get("roles") != null) {
                 Collection<String> roles = (Collection<String>) realmAccess.get("roles");
-                log.info("Roles encontrados en realm_access: {}", roles);
+                log.info("Roles en realm_access: {}", roles);
                 roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                     .forEach(authorities::add);
-            } else {
-                log.info("No se encontraron roles en realm_access");
             }
 
+            // 2. Buscar en resource_access.<client-id>.roles
+            Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
+            if (resourceAccess != null) {
+                // Reemplaza "hotel-app" con el clientId de tu Keycloak (el mismo del environment)
+                Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get("hotel-app");
+                if (clientAccess != null && clientAccess.get("roles") != null) {
+                    Collection<String> roles = (Collection<String>) clientAccess.get("roles");
+                    log.info("Roles en resource_access (hotel-app): {}", roles);
+                    roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .forEach(authorities::add);
+                }
+            }
+
+            // Si no se encontraron roles, asignar uno por defecto? Mejor dejarlo vacío.
             log.info("Autoridades generadas: {}", authorities);
             return authorities;
         });

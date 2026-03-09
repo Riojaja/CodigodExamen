@@ -1,7 +1,8 @@
 package com.example.proyecto.app.config;
 
 import com.example.proyecto.app.security.JwtRequestFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.proyecto.app.security.JwtUtil;
+import com.example.proyecto.app.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -18,11 +19,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@Profile("jwt") // ← IMPORTANTE: Solo se activa con el perfil jwt
+@Profile("jwt")
 public class SecurityConfig {
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtUtil jwtUtil;
+
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtUtil jwtUtil) {
+        this.userDetailsService = userDetailsService;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Bean
+    public JwtRequestFilter jwtRequestFilter() {
+        return new JwtRequestFilter(userDetailsService, jwtUtil);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,11 +52,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "USER")
+                .requestMatchers(HttpMethod.POST, "/api/upload").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/**").hasAuthority("ADMIN")
                 .requestMatchers("/api/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

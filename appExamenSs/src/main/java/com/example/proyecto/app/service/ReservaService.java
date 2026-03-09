@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -15,16 +16,20 @@ import java.util.Optional;
 @Transactional
 public class ReservaService {
     @Autowired
-    private ReservaRepository repository;
+    private ReservaRepository reservaRepository;
+
     @Autowired
     private HabitacionService habitacionService;
 
     public List<Reserva> listarTodos() {
-        return repository.findAll();
+        return reservaRepository.findAll();
     }
+
     public Optional<Reserva> obtenerPorId(Integer id) {
-        return repository.findById(id);
+        // Usar el método que carga las relaciones
+        return reservaRepository.findByIdWithDetails(id);
     }
+
     public Reserva guardar(Reserva reserva) {
         // Calcular noches
         if (reserva.getFechaInicio() != null && reserva.getFechaFin() != null) {
@@ -43,12 +48,19 @@ public class ReservaService {
                 }
             }
         }
-        return repository.save(reserva);
+        return reservaRepository.save(reserva);
     }
+
     public void eliminar(Integer id) {
-        repository.deleteById(id);
+        reservaRepository.deleteById(id);
     }
+
     public boolean existePorId(Integer id) {
-        return repository.existsById(id);
+        return reservaRepository.existsById(id);
+    }
+
+    public boolean isHabitacionDisponible(Integer idHabitacion, LocalDate fechaInicio, LocalDate fechaFin, Integer idReservaExcluir) {
+        List<Reserva> reservas = reservaRepository.findReservasSolapadas(idHabitacion, fechaInicio, fechaFin, idReservaExcluir);
+        return reservas.isEmpty();
     }
 }

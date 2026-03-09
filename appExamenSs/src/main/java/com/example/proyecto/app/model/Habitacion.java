@@ -14,6 +14,8 @@ public class Habitacion {
     @JoinColumn(name = "id_tipo")
     private TipoHabitacion tipo;
     private String estado;
+    @Column(name = "imagen_url")
+    private String imagenUrl;
 
     public Habitacion() {}
     // Getters y setters
@@ -25,4 +27,6 @@ public class Habitacion {
     public void setTipo(TipoHabitacion tipo) { this.tipo = tipo; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    public String getImagenUrl() { return imagenUrl; }
+    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
 }

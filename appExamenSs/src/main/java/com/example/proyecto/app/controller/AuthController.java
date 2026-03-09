@@ -1,7 +1,5 @@
 package com.example.proyecto.app.controller;
 
-
-
 import com.example.proyecto.app.dto.LoginRequest;
 import com.example.proyecto.app.dto.LoginResponse;
 import com.example.proyecto.app.model.Usuario;
@@ -38,7 +36,8 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             Usuario usuario = usuarioService.findByUsername(loginRequest.getUsername())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            String token = jwtUtil.generateToken(usuario.getUsername());
+            // 🔹 Generar token incluyendo el rol del usuario
+            String token = jwtUtil.generateToken(usuario.getUsername(), usuario.getRole());
             return ResponseEntity.ok(new LoginResponse(token, usuario.getId(), usuario.getUsername(), usuario.getRole()));
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().body("Error: Credenciales inválidas");

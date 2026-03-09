@@ -17,14 +17,14 @@ import java.util.Collections;
 @Transactional
 @Profile("jwt")
 public class UserDetailsServiceImpl implements UserDetailsService {
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getRole());
-        return new User(usuario.getUsername(), usuario.getPassword(), Collections.singletonList(authority));
-    }
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Usuario usuario = usuarioRepository.findByUsername(username)
+				.orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+		SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getRole().toUpperCase());
+		return new User(usuario.getUsername(), usuario.getPassword(), Collections.singletonList(authority));
+	}
 }

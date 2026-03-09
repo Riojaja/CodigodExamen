@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -85,5 +86,19 @@ public class ReservaController {
                 })
                 .orElse(ResponseEntity.notFound().<byte[]>build()); // Retorna ResponseEntity<byte[]> con status 404
     }
+    
+    @GetMapping("/disponibilidad")
+    public ResponseEntity<Boolean> verificarDisponibilidad(
+            @RequestParam Integer idHabitacion,
+            @RequestParam String fechaInicio,
+            @RequestParam String fechaFin,
+            @RequestParam(required = false) Integer idReserva) {
+        LocalDate inicio = LocalDate.parse(fechaInicio);
+        LocalDate fin = LocalDate.parse(fechaFin);
+        boolean disponible = service.isHabitacionDisponible(idHabitacion, inicio, fin, idReserva);
+        return ResponseEntity.ok(disponible);
+    }
+    
+    
     
 }
